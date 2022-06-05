@@ -12,7 +12,7 @@ void naiveline(int, int, int, int);
 
 
 int window_len = 500;
-int window_pixel_depth = 250;
+int window_pixel_depth = 50; //250;
 
 
 void myInit(void) {
@@ -34,13 +34,13 @@ void myDisplay(void) {
 	glClear(GL_COLOR_BUFFER_BIT);
 
 
-	//naiveline(10, 10, 20, 20);
-    //naiveline(10, 30, 30, 35);
-    //naiveline(35, 35, 39, 5);
-    //naiveline(5, 5, 20, 5);
-    //naiveline(5, 7, 5, 20);
+	naiveline(10, 10, 20, 20);
+    naiveline(10, 30, 30, 35);
+    naiveline(35, 35, 39, 5);
+    naiveline(5, 5, 20, 5);
+    naiveline(5, 7, 5, 20);
 
-    naiveline(42, 42, 242, 101);
+    //naiveline(42, 42, 242, 101);
 
 
     glFlush();
@@ -141,6 +141,21 @@ void naiveline(int x1, int y1, int x2, int y2) {
     int walk_x, walk_y;
 
     while(abs(current_x - x2) > abs(slope_x) || abs(current_y - y2) > abs(slope_y)) {
+        if(abs(current_x - x2) > abs(current_y - y2)) {
+            if(slope_x > 0) {
+                current_x += 1;
+            }else if(slope_x < 0) {
+                current_x -= 1;
+            }
+        }else {
+            if(slope_y > 0) {
+                current_y += 1;
+            }else if(slope_y < 0) {
+                current_y -= 1;
+            }
+        }
+
+        /*
         walk_x = abs(slope_x);
         walk_y = abs(slope_y);
 
@@ -165,7 +180,8 @@ void naiveline(int x1, int y1, int x2, int y2) {
                 walk_y -= 1;
             }
         }
-
+        */
+        
         pixelpoint(current_x, current_y);
     }
 }
