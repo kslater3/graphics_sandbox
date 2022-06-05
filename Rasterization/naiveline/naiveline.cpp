@@ -11,17 +11,21 @@ void pixelpoint(int, int);
 void naiveline(int, int, int, int);
 
 
+int window_len = 500;
+int window_pixel_depth = 250;
+
+
 void myInit(void) {
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 
     glColor3f(0.9f, 0.9f, 0.9f);
 
-    glPointSize(10.0);
+    glPointSize(((GLfloat) window_len) / ((GLfloat) window_pixel_depth));
 
     glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 
-    gluOrtho2D(0.0, 500.0, 0.0, 500.0);
+    gluOrtho2D(0.0, (GLdouble) window_len, 0.0, (GLdouble) window_len);
 }
 
 
@@ -30,8 +34,13 @@ void myDisplay(void) {
 	glClear(GL_COLOR_BUFFER_BIT);
 
 
-	naiveline(10, 10, 20, 20);
-    naiveline(10, 30, 30, 35);
+	//naiveline(10, 10, 20, 20);
+    //naiveline(10, 30, 30, 35);
+    //naiveline(35, 35, 39, 5);
+    //naiveline(5, 5, 20, 5);
+    //naiveline(5, 7, 5, 20);
+
+    naiveline(42, 42, 242, 101);
 
 
     glFlush();
@@ -42,7 +51,7 @@ void myDisplay(void) {
 int main(int argc, char **argv) {
 	glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB);
 
-	glutInitWindowSize(500, 500);
+	glutInitWindowSize(window_len, window_len);
 	glutInitWindowPosition(100, 150);
 
 	glutInit(&argc, argv);
@@ -63,6 +72,10 @@ int main(int argc, char **argv) {
 
 
 int gcd(int a, int b) {
+    if(a == 0 || b == 0) {
+        return 0;
+    }
+
     if(a > b) {
         int c = b;
         b = a;
@@ -87,13 +100,13 @@ int gcd(int a, int b) {
 
 
 void pixelpoint(int x, int y) {
-    int p_x = x * 500/50;
-    int p_y = y * 500/50;
+    int p_x = x * window_len/window_pixel_depth;
+    int p_y = y * window_len/window_pixel_depth;
 
-    if((p_x % 50) >= 25) {
+    if((p_x % window_pixel_depth) >= window_pixel_depth/2) {
         p_x += 1;
     }
-    if((p_y % 50) >= 25) {
+    if((p_y % window_pixel_depth) >= window_pixel_depth/2) {
         p_y += 1;
     }
 
@@ -109,8 +122,17 @@ void naiveline(int x1, int y1, int x2, int y2) {
     int slope_x = x2 - x1;
     int slope_gcd = gcd(abs(slope_x), abs(slope_y));
 
-    slope_x = slope_x/slope_gcd;
-    slope_y = slope_y/slope_gcd;
+    if(slope_gcd == 0) {
+        if(slope_x == 0) {
+            slope_y = 1;
+        }else {
+            slope_y = 0;
+            slope_x = 1;
+        }
+    }else {
+        slope_x = slope_x/slope_gcd;
+        slope_y = slope_y/slope_gcd;
+    }
 
     int current_x = x1;
     int current_y = y1;
@@ -118,18 +140,28 @@ void naiveline(int x1, int y1, int x2, int y2) {
 
     int walk_x, walk_y;
 
-    while(abs(current_x - x2) > slope_x || abs(current_y - y2) > slope_y) {
-        walk_x = slope_x;
-        walk_y = slope_y;
+    while(abs(current_x - x2) > abs(slope_x) || abs(current_y - y2) > abs(slope_y)) {
+        walk_x = abs(slope_x);
+        walk_y = abs(slope_y);
 
         while(walk_x > 0 || walk_y > 0) {
             pixelpoint(current_x, current_y);
 
             if(walk_x >= walk_y) {
-                current_x += 1;
+                if(slope_x > 0) {
+                    current_x += 1;
+                }else if(slope_x < 0) {
+                    current_x -= 1;
+                }
+
                 walk_x -= 1;
             }else {
-                current_y += 1;
+                if(slope_y > 0) {
+                    current_y += 1;
+                }else if(slope_y < 0) {
+                    current_y -= 1;
+                }
+
                 walk_y -= 1;
             }
         }
