@@ -1,3 +1,7 @@
+/*
+I started with a mess, then I switched to a messy para-implementation of the Bresenham Algorithm after reading some
+of the Wikipedia article on the matter
+*/
 
 #include <cstdlib>
 #include <cmath>
@@ -118,70 +122,114 @@ void pixelpoint(int x, int y) {
 
 
 void naiveline(int x1, int y1, int x2, int y2) {
-    int slope_y = y2 - y1;
-    int slope_x = x2 - x1;
-    int slope_gcd = gcd(abs(slope_x), abs(slope_y));
+    if(x1 == x2) {
+        if(y1 > y2) {
+            int dummy_y = y2;
 
-    if(slope_gcd == 0) {
-        if(slope_x == 0) {
-            slope_y = 1;
-        }else {
-            slope_y = 0;
-            slope_x = 1;
+            y2 = y1;
+            y1 = dummy_y;
+        }
+
+        int current_y = y1;
+
+        for(int i = 0; i <= y2 - y1; i++) {
+            pixelpoint(x1, current_y);
+
+            current_y += 1;
+        }
+    }else if(y1 == y2) {
+        if(x1 > x2) {
+            int dummy_x = x2;
+
+            x2 = x1;
+            x1 = dummy_x;
+        }
+
+        int current_x = x1;
+
+        for(int i = 0; i <= x2 - x1; i++) {
+            pixelpoint(current_x, y1);
+
+            current_x += 1;
         }
     }else {
+        int slope_x = x2 - x1;
+        int slope_y = y2 - y1;
+        int slope_gcd = gcd(abs(slope_x), abs(slope_y));
+
         slope_x = slope_x/slope_gcd;
         slope_y = slope_y/slope_gcd;
-    }
-
-    int current_x = x1;
-    int current_y = y1;
 
 
-    int walk_x, walk_y;
+        // y = mx - mx2 + y2
+        // y = slope_y*x/slope_x (+1 if slope_y*x % slope_x >= slope_x/2 - 1) - same thing for x2, then add y2 on.
+        // Same for the X walk along Y version
 
-    while(abs(current_x - x2) > abs(slope_x) || abs(current_y - y2) > abs(slope_y)) {
-        if(abs(current_x - x2) > abs(current_y - y2)) {
-            if(slope_x > 0) {
-                current_x += 1;
-            }else if(slope_x < 0) {
-                current_x -= 1;
+
+        if(abs(slope_y/slope_x) >= 2) {
+            if(y1 > y2) {
+                int dummy_x = x2;
+                int dummy_y = y2;
+
+                x2 = x1;
+                y2 = y1;
+                x1 = dummy_x;
+                y1 = dummy_y;
             }
-        }else {
-            if(slope_y > 0) {
+
+            int current_x = x1;
+            int current_y = y1;
+
+            for(int i = 0; i <= y2 - y1; i++) {
+                pixelpoint(current_x, current_y);
+
                 current_y += 1;
-            }else if(slope_y < 0) {
-                current_y -= 1;
-            }
-        }
+                current_x = slope_x * current_y / slope_y;
 
-        /*
-        walk_x = abs(slope_x);
-        walk_y = abs(slope_y);
-
-        while(walk_x > 0 || walk_y > 0) {
-            pixelpoint(current_x, current_y);
-
-            if(walk_x >= walk_y) {
-                if(slope_x > 0) {
+                if(slope_x * current_y % slope_y >= slope_y/2 - 1) {
                     current_x += 1;
-                }else if(slope_x < 0) {
+                }
+
+                current_x -= slope_x * y2 / slope_y;
+
+                if(slope_x * y2 % slope_y >= slope_y/2 - 1) {
                     current_x -= 1;
                 }
 
-                walk_x -= 1;
-            }else {
-                if(slope_y > 0) {
+                current_x += y2;
+            }
+        }else {
+            if(x1 > x2) {
+                int dummy_x = x2;
+                int dummy_y = y2;
+
+                x2 = x1;
+                y2 = y1;
+                x1 = dummy_x;
+                y1 = dummy_y;
+            }
+
+            int current_x = x1;
+            int current_y = y1;
+
+            for(int i = 0; i <= x2 - x1; i++) {
+                pixelpoint(current_x, current_y);
+
+                current_x += 1;
+                current_y = slope_y * current_x / slope_x;
+
+                if(slope_y * current_x % slope_x >= slope_x/2 - 1) {
                     current_y += 1;
-                }else if(slope_y < 0) {
+                }
+
+                current_y -= slope_y * x2 / slope_x;
+
+                if(slope_y * x2 % slope_x >= slope_x/2 - 1) {
                     current_y -= 1;
                 }
 
-                walk_y -= 1;
+                current_y += y2;
             }
         }
-        */
-        
-        pixelpoint(current_x, current_y);
     }
 }
